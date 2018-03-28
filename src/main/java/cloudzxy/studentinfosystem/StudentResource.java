@@ -14,24 +14,27 @@ import javax.ws.rs.core.MediaType;
 
 @Path("students")
 public class StudentResource {
+	
+	StudentDataStore studentRepo = new StudentDataStore();
+	
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public List<Student> getStudents() {
-		return StudentDataStore.getAll();
+		return studentRepo.getAll();
 	}
 
 	@GET
 	@Path("{studentId}")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Student getStudent(@PathParam("studentId") String id) {
-		return StudentDataStore.get(id);
+		return studentRepo.get(id);
 	}
 
 	@POST
 	@Path("student")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Student createStudent(Student s) {
-		StudentDataStore.create(s);
+		studentRepo.create(s);
 
 		return s;
 	}
@@ -40,14 +43,23 @@ public class StudentResource {
 	@Path("student")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Student updateStudent(Student s) {
-		StudentDataStore.update(s);
+		if (studentRepo.get(s.getStudentId()) == null) {
+			studentRepo.create(s);
+		} else {
+		    studentRepo.update(s);
+		}
 
-		return s;
+		return studentRepo.get(s.getStudentId());
 	}
 
 	@DELETE
 	@Path("{studentId}")
 	public Student removeStudent(@PathParam("studentId") String id) {
-		return StudentDataStore.delete(id);
+		Student student = studentRepo.get(id);
+		if (student != null) {
+			studentRepo.delete(id);
+		}
+		
+		return student;
 	}
 }

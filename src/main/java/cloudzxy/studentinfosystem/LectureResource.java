@@ -14,25 +14,26 @@ import javax.ws.rs.core.MediaType;
 
 @Path("lectures")
 public class LectureResource {
-
+    LectureDataStore lectureRepo = new LectureDataStore();
+	
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public List<Lecture> getLectures() {
-		return LectureDataStore.getAll();
+		return lectureRepo.getAll();
 	}
 
 	@GET
 	@Path("{lectureName}")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Lecture getLecture(@PathParam("lectureName") String name) {
-		return LectureDataStore.get(name);
+		return lectureRepo.get(name);
 	}
 
 	@POST
 	@Path("lecture")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Lecture createLecture(Lecture l) {
-		LectureDataStore.create(l);
+		lectureRepo.create(l);
 
 		return l;
 	}
@@ -41,14 +42,23 @@ public class LectureResource {
 	@Path("lecture")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Lecture updateLecture(Lecture l) {
-		LectureDataStore.update(l);
+		if (lectureRepo.get(l.getLectureName()) == null) {
+			lectureRepo.create(l);
+		} else {
+			lectureRepo.update(l);
+		}		
 
-		return l;
+		return lectureRepo.get(l.getLectureName());
 	}
 
 	@DELETE
 	@Path("{lectureName}")
 	public Lecture removeLecture(@PathParam("lectureName") String name) {
-		return LectureDataStore.delete(name);
+		Lecture lecture = lectureRepo.get(name);
+		if (lecture != null) {
+			lectureRepo.delete(name);
+		}
+		
+		return lecture;
 	}
 }

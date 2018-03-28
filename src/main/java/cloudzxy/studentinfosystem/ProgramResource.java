@@ -14,25 +14,26 @@ import javax.ws.rs.core.MediaType;
 
 @Path("programs")
 public class ProgramResource {
-
+    ProgramDataStore programRepo = new ProgramDataStore();
+	
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public List<Program> getPrograms() {
-		return ProgramDataStore.getAll();
+		return programRepo.getAll();
 	}
 
 	@GET
 	@Path("{programName}")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Program getProgram(@PathParam("programName") String name) {
-		return ProgramDataStore.get(name);
+		return programRepo.get(name);
 	}
 
 	@POST
 	@Path("program")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Program createProgram(Program p) {
-		ProgramDataStore.create(p);
+		programRepo.create(p);
 
 		return p;
 	}
@@ -41,14 +42,22 @@ public class ProgramResource {
 	@Path("program")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Program updateProgram(Program p) {
-		ProgramDataStore.update(p);
+		if (programRepo.get(p.getProgramName()) == null) {
+			programRepo.create(p);
+		} else {
+			programRepo.update(p);
+		}		
 
-		return p;
+		return programRepo.get(p.getProgramName());
 	}
 
 	@DELETE
 	@Path("{programName}")
 	public Program removeProgram(@PathParam("programName") String name) {
-		return ProgramDataStore.delete(name);
+		Program program = programRepo.get(name);
+		if (programRepo.get(name) != null) {
+			programRepo.delete(name);
+		}
+		return program;
 	}
 }

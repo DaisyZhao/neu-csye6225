@@ -2,13 +2,20 @@ package cloudzxy.studentinfosystem;
 
 import java.util.*;
 
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
+
+@DynamoDBTable(tableName="Student")
 public class Student {
 	private String studentId;
 	private String name;
 	private String image;
-	private List<String> enrolledCourseNames;
+	private String email;
+	private Set<String> enrolledCourseNames;
 	private String programName;
 
+	@DynamoDBHashKey(attributeName="studentId")
 	public String getStudentId() {
 		return studentId;
 	}
@@ -17,6 +24,7 @@ public class Student {
 		this.studentId = studentId;
 	}
 
+	@DynamoDBAttribute(attributeName="name")
 	public String getName() {
 		return name;
 	}
@@ -25,6 +33,16 @@ public class Student {
 		this.name = name;
 	}
 
+	@DynamoDBAttribute(attributeName="email")
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	@DynamoDBAttribute(attributeName="image")
 	public String getImage() {
 		return image;
 	}
@@ -33,14 +51,16 @@ public class Student {
 		this.image = image;
 	}
 
-	public List<String> getEnrolledCourseNames() {
+	@DynamoDBAttribute(attributeName="enrolledCourseNames")
+	public Set<String> getEnrolledCourseNames() {
 		return enrolledCourseNames;
 	}
 
-	public void setEnrolledCourseNames(List<String> enrolledCourseNames) {
+	public void setEnrolledCourseNames(Set<String> enrolledCourseNames) {
 		this.enrolledCourseNames = enrolledCourseNames;
 	}
 
+	@DynamoDBAttribute(attributeName="programName")
 	public String getProgramName() {
 		return programName;
 	}

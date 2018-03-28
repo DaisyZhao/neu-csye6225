@@ -15,24 +15,26 @@ import javax.ws.rs.core.MediaType;
 @Path("courses")
 public class CourseResource {
 
+	CourseDataStore courseRepo = new CourseDataStore();
+	
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public List<Course> getCourses() {
-		return CourseDataStore.getAll();
+		return courseRepo.getAll();
 	}
 
 	@GET
 	@Path("{courseName}")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Course getCourse(@PathParam("courseName") String name) {
-		return CourseDataStore.get(name);
+		return courseRepo.get(name);
 	}
 
 	@POST
 	@Path("course")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Course createCourse(Course c) {
-		CourseDataStore.create(c);
+		courseRepo.create(c);
 
 		return c;
 	}
@@ -41,14 +43,23 @@ public class CourseResource {
 	@Path("course")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Course updateCourse(Course c) {
-		CourseDataStore.update(c);
+		if (courseRepo.get(c.getCourseName()) == null) {
+			courseRepo.create(c);
+		} else {
+			courseRepo.update(c);
+		}	
 
-		return c;
+		return courseRepo.get(c.getCourseName());
 	}
 
 	@DELETE
 	@Path("{courseName}")
 	public Course removeCourse(@PathParam("courseName") String name) {
-		return CourseDataStore.delete(name);
+		Course course = courseRepo.get(name);
+		if (course != null) {
+			courseRepo.delete(name);
+		}
+		
+		return course;
 	}
 }

@@ -2,34 +2,54 @@ package cloudzxy.studentinfosystem;
 
 import java.util.*;
 
-public class StudentDataStore {
-	private static Map<String, Student> studentRepo = new HashMap<>();
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
 
-	public static List<Student> getAll() {
-		List<Student> studentList = new ArrayList<>();
-		studentList.addAll(studentRepo.values());
+public class StudentDataStore {	
+	static AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard()
+			.withCredentials(new AWSStaticCredentialsProvider(AccessCredentials.credentials))
+			.withRegion(Regions.US_WEST_2).build();
+		
+	public List<Student> getAll() {
+		DynamoDBMapper mapper = new DynamoDBMapper(client);
+		DynamoDBScanExpression scanExpression = new DynamoDBScanExpression();
+		List<Student> studentList = mapper.scan(Student.class, scanExpression);
 
 		return studentList;
 	}
 
-	public static Student get(String id) {
-		return studentRepo.get(id);
+	public Student get(String sId) {
+        DynamoDBMapper mapper = new DynamoDBMapper(client);
+		
+		return mapper.load(Student.class, sId);
 	}
 
-	public static void create(Student s) {
-		studentRepo.put(s.getStudentId(), s);
+	public void create(Student s) {
+        DynamoDBMapper mapper = new DynamoDBMapper(client);
+		
+		mapper.save(s);;
 	}
-
-	public static void update(Student s) {
-		studentRepo.put(s.getStudentId(), s);
+	
+	public void update(Student s) {
+		DynamoDBMapper mapper = new DynamoDBMapper(client);
+		
+		Student studentToUpdate = mapper.load(Student.class, s.getStudentId());
+		studentToUpdate.setName(s.getName());
+		studentToUpdate.setEmail(s.getEmail());
+		studentToUpdate.setImage(s.getImage());
+		studentToUpdate.setProgramName(s.getProgramName());
+		studentToUpdate.setEnrolledCourseNames(s.getEnrolledCourseNames());
+	
+		mapper.save(studentToUpdate);
 	}
-
-	public static Student delete(String id) {
-		Student s = studentRepo.get(id);
-		if (s != null) {
-			studentRepo.remove(id);
-		}
-
-		return s;
+	
+	public void delete(String sId) {
+		DynamoDBMapper mapper = new DynamoDBMapper(client);
+		Student studentToDelete = mapper.load(Student.class, sId);
+		mapper.delete(studentToDelete);
 	}
 }
